@@ -3,9 +3,9 @@
 ## 简介
 goImg是一个简单的图像服务器。
 ## 特点
-图片格式支持jpeg、gif、png、webp格式。
-文件存储目录采用md5算法生成。
-图片缩放只支持jpeg格式。
+* 图片格式支持jpeg、gif、png、webp格式。
+* 文件存储目录采用md5算法生成。
+* 图片缩放只支持jpeg格式。
 
 ## 配置文件
 
@@ -35,5 +35,5 @@ GET /{图片ID}_{宽}x{高}
 {图片文件}
 
 ### 第三方组件
-github.com/gorilla/mux
-github.com/nfnt/resize
+* github.com/gorilla/mux
+* github.com/nfnt/resize
