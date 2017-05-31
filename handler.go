@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
+
 	"log"
 	"net/http"
 	"os"
@@ -120,43 +121,63 @@ func DownloadResizHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	imgPath := GetPathByMd5(imageId)
 
-	resizeImgPath := imgPath + "_" + width + "x" + height
-	// resize img not exist
-	if !FileExist(resizeImgPath) {
-		if !FileExist(imgPath) {
-			w.Write([]byte("Error:Image Not Found."))
-			return
+	file, err := os.Open(imgPath)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Image Open Error."))
+		return
+	}
+	defer file.Close()
+
+	buff := make([]byte, 512)
+	_, err = file.Read(buff)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Image Not Found."))
+		return
+	}
+	if _, err = file.Seek(0, 0); err != nil {
+		log.Println(err)
+	}
+	fileType := http.DetectContentType(buff)
+	fmt.Println(fileType)
+
+	if fileType == "image/jpeg" {
+		resizeImgPath := imgPath + "_" + width + "x" + height
+
+		// resize img not exist
+		if !FileExist(resizeImgPath) {
+
+			// decode jpeg into image.Image
+			img, err := jpeg.Decode(file)
+			if err != nil {
+				w.Write([]byte("Error:Image Decode Error."))
+				return
+			}
+			file.Close()
+
+			// resize to width 1000 using Lanczos resampling
+			// and preserve aspect ratio
+
+			m := resize.Resize(uint(widthInt), uint(heightInt), img, resize.Lanczos3)
+
+			out, err := os.Create(resizeImgPath)
+			if err != nil {
+				w.Write([]byte("Error:Resize Image Create Error."))
+				return
+			}
+			defer out.Close()
+
+			// write new image to file
+			jpeg.Encode(out, m, nil)
 		}
 
-		// open source img
-		file, err := os.Open(imgPath)
-		if err != nil {
-			log.Fatal(err)
-		}
+		http.ServeFile(w, r, resizeImgPath)
 
-		// decode jpeg into image.Image
-		img, err := jpeg.Decode(file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		file.Close()
-
-		// resize to width 1000 using Lanczos resampling
-		// and preserve aspect ratio
-
-		m := resize.Resize(uint(widthInt), uint(heightInt), img, resize.Lanczos3)
-
-		out, err := os.Create(resizeImgPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer out.Close()
-
-		// write new image to file
-		jpeg.Encode(out, m, nil)
+	} else {
+		http.ServeFile(w, r, imgPath)
 	}
 
-	http.ServeFile(w, r, resizeImgPath)
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
