@@ -6,7 +6,7 @@ goImg是一个简单的图像服务器。
 * 图片格式支持jpeg、gif、png、webp格式。
 * 文件存储目录采用md5算法生成。
 * 图片缩放只支持jpeg格式。
-##安装
+## 安装
 go get  github.com/nymbian/goImg
 ## 配置文件
 conf.json
