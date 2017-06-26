@@ -1,17 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"image"
 	"image/jpeg"
 	"io"
-
+	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
@@ -19,9 +23,9 @@ import (
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
-	//key uploadfile
+	//key file
 	r.ParseMultipartForm(32 << 20)
-	file, _, err := r.FormFile("uploadfile")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte("Error:Upload Error.1"))
@@ -39,16 +43,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	fileType := http.DetectContentType(buff)
 	fmt.Println(fileType)
 
-	fileTypes := []string{"image/jpeg", "image/gif", "image/png", "image/webp"}
-	result := false
-	for _, v := range fileTypes {
-		if fileType == v {
-			result = true
-			break
-		}
-	}
-
-	if result == false {
+	if checkFileType(fileType) == false {
 		w.Write([]byte("Error:Not Img."))
 		return
 	}
@@ -77,7 +72,191 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println(path)
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Save Error."))
+		return
+	}
+	defer f.Close()
+	bytesWritten, err := io.Copy(f, file)
+	checkErr(err)
+	fmt.Println(bytesWritten)
+	w.Write([]byte(imageId))
+
+}
+
+func UrlHandler(w http.ResponseWriter, r *http.Request) {
+
+	//key url
+	r.ParseForm()
+	url := r.FormValue("url")
+	fmt.Println(url)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		w.Write([]byte("Error:Image Download Error."))
+	}
+
+	defer resp.Body.Close()
+
+	fmt.Println(resp)
+	if resp.StatusCode == 200 {
+
+		urlPath := strings.Split(url, "/")
+		var name string
+		if len(urlPath) > 1 {
+			name = urlPath[len(urlPath)-1]
+		}
+		random := strconv.Itoa(rand.Int())
+		name = conf.Storage + random + name
+		fmt.Println(name)
+		out, err := os.Create(name)
+		checkErr(err)
+		defer out.Close()
+
+		pix, err := ioutil.ReadAll(resp.Body)
+		checkErr(err)
+		_, err = io.Copy(out, bytes.NewReader(pix))
+		checkErr(err)
+		file, err := os.Open(name)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Upload Error.1"))
+			return
+		}
+		defer file.Close()
+		//file type
+		buff := make([]byte, 512)
+		_, err = file.Read(buff)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Upload Error.2"))
+			return
+		}
+		fileType := http.DetectContentType(buff)
+		fmt.Println(fileType)
+
+		if checkFileType(fileType) == false {
+			w.Write([]byte("Error:Not Img."))
+			return
+		}
+
+		if _, err = file.Seek(0, 0); err != nil {
+			log.Println(err)
+		}
+
+		md5h := md5.New()
+		io.Copy(md5h, file)
+
+		imageId := hex.EncodeToString(md5h.Sum(nil))
+		fmt.Println(imageId)
+		//imageId = "86427d1debefe65f0da3a7affdc204f2"
+
+		err = MkdirByMd5(imageId)
+		if err != nil {
+			log.Println(err)
+		}
+
+		path := GetPathByMd5(imageId)
+		//path := "E:/1037u/1.gif"
+
+		if _, err = file.Seek(0, 0); err != nil {
+			log.Println(err)
+		}
+
+		fmt.Println(path)
+		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Save Error."))
+			return
+		}
+		defer f.Close()
+		bytesWritten, err := io.Copy(f, file)
+		checkErr(err)
+		fmt.Println(bytesWritten)
+		w.Write([]byte(imageId))
+
+	} else {
+		w.Write([]byte("Error:Remote Image Download Error."))
+	}
+
+	return
+
+}
+
+func Base64Handler(w http.ResponseWriter, r *http.Request) {
+	//key base64
+	r.ParseForm()
+	base64String := r.FormValue("base64")
+	fmt.Println(base64String)
+	base64DecodeString, err := base64.StdEncoding.DecodeString(base64String) //成图片文件并把文件写入到buffer
+	if err != nil {
+		w.Write([]byte("Error:Base64 Decode Error."))
+		return
+	}
+	//fmt.Println(base64DecodeString)
+	random := strconv.Itoa(rand.Int())
+	fmt.Println(random)
+	name := random + "base64.jpg"
+	name = conf.Storage + name
+	err = ioutil.WriteFile(name, base64DecodeString, 0755)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Upload Error.0"))
+		return
+	}
+
+	file, err := os.Open(name)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Upload Error.1"))
+		return
+	}
+	defer file.Close()
+
+	//file type
+	buff := make([]byte, 512)
+	_, err = file.Read(buff)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Upload Error.2"))
+		return
+	}
+	fileType := http.DetectContentType(buff)
+	fmt.Println(fileType)
+
+	if checkFileType(fileType) == false {
+		w.Write([]byte("Error:Not Img."))
+		return
+	}
+
+	if _, err = file.Seek(0, 0); err != nil {
+		log.Println(err)
+	}
+
+	md5h := md5.New()
+	io.Copy(md5h, file)
+
+	imageId := hex.EncodeToString(md5h.Sum(nil))
+	fmt.Println(imageId)
+	//imageId = "86427d1debefe65f0da3a7affdc204f2"
+
+	err = MkdirByMd5(imageId)
+	if err != nil {
+		log.Println(err)
+	}
+
+	path := GetPathByMd5(imageId)
+	//path := "E:/1037u/1.gif"
+
+	if _, err = file.Seek(0, 0); err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(path)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte("Error:Save Error."))
@@ -142,6 +321,7 @@ func DownloadResizHandler(w http.ResponseWriter, r *http.Request) {
 	fileType := http.DetectContentType(buff)
 	fmt.Println(fileType)
 
+	//image format equal jpeg
 	if fileType == "image/jpeg" {
 		resizeImgPath := imgPath + "_" + width + "x" + height
 
@@ -192,4 +372,16 @@ func LoadImage(path string) (img image.Image, err error) {
 	defer file.Close()
 	img, _, err = image.Decode(file)
 	return
+}
+
+func checkFileType(fileType string) bool {
+	fileTypes := []string{"image/jpeg", "image/gif", "image/png", "image/webp"}
+	result := false
+	for _, v := range fileTypes {
+		if fileType == v {
+			result = true
+			break
+		}
+	}
+	return result
 }
