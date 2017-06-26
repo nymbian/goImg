@@ -18,10 +18,24 @@ conf.json
 ```
 
 ## 使用方法
-### 上传图片
-POST /
+### 上传图片方法1
+POST /upload
 表单参数:
-uploadfile file类型,要上传的图片
+file file类型,要上传的图片
+返回值:
+{图片ID}
+
+### 上传图片方法2
+POST /url
+表单参数:
+url 要上传的图片的远程地址
+返回值:
+{图片ID}
+
+### 上传图片方法3
+POST /base64
+表单参数:
+base64 要上传的图片的base64值
 返回值:
 {图片ID}
 
