@@ -130,7 +130,11 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_, err = io.Copy(out, bytes.NewReader(pix))
-		checkErr(err)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Upload Error0."))
+			return
+		}
 		file, err := os.Open(name)
 		if err != nil {
 			log.Println(err)
@@ -207,6 +211,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	base64String := r.FormValue("base64")
 	fmt.Println(base64String)
+	base64String = deleteBase64Head(base64String)
 	base64DecodeString, err := base64.StdEncoding.DecodeString(base64String) //成图片文件并把文件写入到buffer
 	if err != nil {
 		w.Write([]byte("Error:Base64 Decode Error."))
@@ -404,4 +409,15 @@ func checkFileType(fileType string) bool {
 		}
 	}
 	return result
+}
+func deleteBase64Head(base64String string) string {
+	deleteStrings := []string{"data:image/jpeg;base64,", "data:image/gif;base64,", "data:image/png;base64,", "data:image/webp;base64,"}
+	for _, v := range deleteStrings {
+		if strings.Contains(base64String, v) {
+			base64String = strings.Replace(base64String, v, "", -1)
+			break
+		}
+
+	}
+	return base64String
 }
