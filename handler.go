@@ -28,7 +28,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Upload Error.1"))
+		w.Write([]byte("Error:Upload Error1."))
 		return
 	}
 	defer file.Close()
@@ -37,7 +37,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = file.Read(buff)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Upload Error.2"))
+		w.Write([]byte("Error:Upload Error2."))
 		return
 	}
 	fileType := http.DetectContentType(buff)
@@ -75,12 +75,16 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Save Error."))
+		w.Write([]byte("Error:Save Error1."))
 		return
 	}
 	defer f.Close()
 	bytesWritten, err := io.Copy(f, file)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Save Error2."))
+		return
+	}
 	fmt.Println(bytesWritten)
 	w.Write([]byte(imageId))
 
@@ -112,17 +116,25 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		name = conf.Storage + random + name
 		fmt.Println(name)
 		out, err := os.Create(name)
-		checkErr(err)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Upload Error0."))
+			return
+		}
 		defer out.Close()
 
 		pix, err := ioutil.ReadAll(resp.Body)
-		checkErr(err)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Upload Error0."))
+			return
+		}
 		_, err = io.Copy(out, bytes.NewReader(pix))
 		checkErr(err)
 		file, err := os.Open(name)
 		if err != nil {
 			log.Println(err)
-			w.Write([]byte("Error:Upload Error.1"))
+			w.Write([]byte("Error:Upload Error1."))
 			return
 		}
 		defer file.Close()
@@ -131,7 +143,7 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = file.Read(buff)
 		if err != nil {
 			log.Println(err)
-			w.Write([]byte("Error:Upload Error.2"))
+			w.Write([]byte("Error:Upload Error2."))
 			return
 		}
 		fileType := http.DetectContentType(buff)
@@ -169,12 +181,16 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
 		if err != nil {
 			log.Println(err)
-			w.Write([]byte("Error:Save Error."))
+			w.Write([]byte("Error:Save Error1."))
 			return
 		}
 		defer f.Close()
 		bytesWritten, err := io.Copy(f, file)
-		checkErr(err)
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Error:Save Error2."))
+			return
+		}
 		fmt.Println(bytesWritten)
 		w.Write([]byte(imageId))
 
@@ -204,14 +220,14 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	err = ioutil.WriteFile(name, base64DecodeString, 0755)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Upload Error.0"))
+		w.Write([]byte("Error:Upload Error0."))
 		return
 	}
 
 	file, err := os.Open(name)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Upload Error.1"))
+		w.Write([]byte("Error:Upload Error1."))
 		return
 	}
 	defer file.Close()
@@ -221,7 +237,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	_, err = file.Read(buff)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Upload Error.2"))
+		w.Write([]byte("Error:Upload Error2."))
 		return
 	}
 	fileType := http.DetectContentType(buff)
@@ -259,12 +275,16 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error:Save Error."))
+		w.Write([]byte("Error:Save Error1."))
 		return
 	}
 	defer f.Close()
 	bytesWritten, err := io.Copy(f, file)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte("Error:Save Error2."))
+		return
+	}
 	fmt.Println(bytesWritten)
 	w.Write([]byte(imageId))
 
