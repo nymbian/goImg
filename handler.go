@@ -21,6 +21,8 @@ import (
 	"github.com/nfnt/resize"
 )
 
+const fileAuth = 0755
+
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	//key file
@@ -77,7 +79,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println(path)
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, fileAuth)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte("Error:Save Error1."))
@@ -192,7 +194,7 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		fmt.Println(path)
-		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
+		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, fileAuth)
 		if err != nil {
 			log.Println(err)
 			w.Write([]byte("Error:Save Error1."))
@@ -232,7 +234,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(random)
 	name := random + "base64.jpg"
 	name = conf.Storage + name
-	err = ioutil.WriteFile(name, base64DecodeString, 0755)
+	err = ioutil.WriteFile(name, base64DecodeString, fileAuth)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte("Error:Upload Error0."))
@@ -292,7 +294,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println(path)
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0775)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, fileAuth)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte("Error:Save Error1."))
