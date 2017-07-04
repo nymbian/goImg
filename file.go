@@ -24,7 +24,7 @@ func FileExist(filename string) bool {
 }
 
 func MkdirByMd5(imageId string) error {
-	return os.MkdirAll(fmt.Sprintf("%s/%s/%s/%s", conf.Storage, imageId[0:8], imageId[8:16], imageId[16:24]), 0666)
+	return os.MkdirAll(fmt.Sprintf("%s/%s/%s/%s", conf.Storage, imageId[0:8], imageId[8:16], imageId[16:24]), fileAuth)
 }
 
 const filechunk = 8192 // we settle for 8KB
