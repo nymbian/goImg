@@ -59,13 +59,18 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(imageId)
 	//imageId = "86427d1debefe65f0da3a7affdc204f2"
 
+	path := GetPathByMd5(imageId)
+	//path := "E:/1037u/1.gif"
+
+	if FileExist(path) {
+		w.Write([]byte(imageId))
+		return
+	}
+
 	err = MkdirByMd5(imageId)
 	if err != nil {
 		log.Println(err)
 	}
-
-	path := GetPathByMd5(imageId)
-	//path := "E:/1037u/1.gif"
 
 	if _, err = file.Seek(0, 0); err != nil {
 		log.Println(err)
@@ -169,13 +174,18 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(imageId)
 		//imageId = "86427d1debefe65f0da3a7affdc204f2"
 
+		path := GetPathByMd5(imageId)
+		//path := "E:/1037u/1.gif"
+
 		err = MkdirByMd5(imageId)
 		if err != nil {
 			log.Println(err)
 		}
 
-		path := GetPathByMd5(imageId)
-		//path := "E:/1037u/1.gif"
+		if FileExist(path) {
+			w.Write([]byte(imageId))
+			return
+		}
 
 		if _, err = file.Seek(0, 0); err != nil {
 			log.Println(err)
@@ -212,12 +222,12 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	base64String := r.FormValue("base64")
 	fmt.Println(base64String)
 	base64String = deleteBase64Head(base64String)
-	base64DecodeString, err := base64.StdEncoding.DecodeString(base64String) //成图片文件并把文件写入到buffer
+	base64DecodeString, err := base64.StdEncoding.DecodeString(base64String)
 	if err != nil {
 		w.Write([]byte("Error:Base64 Decode Error."))
 		return
 	}
-	//fmt.Println(base64DecodeString)
+
 	random := strconv.Itoa(rand.Int())
 	fmt.Println(random)
 	name := random + "base64.jpg"
@@ -264,13 +274,18 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(imageId)
 	//imageId = "86427d1debefe65f0da3a7affdc204f2"
 
+	path := GetPathByMd5(imageId)
+	//path := "E:/1037u/1.gif"
+
 	err = MkdirByMd5(imageId)
 	if err != nil {
 		log.Println(err)
 	}
 
-	path := GetPathByMd5(imageId)
-	//path := "E:/1037u/1.gif"
+	if FileExist(path) {
+		w.Write([]byte(imageId))
+		return
+	}
 
 	if _, err = file.Seek(0, 0); err != nil {
 		log.Println(err)
@@ -386,7 +401,7 @@ func DownloadResizHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("<html><body><center><h1>It Works!</h1></center><hr><center>Quick Image Server</center></body></html>"))
+	w.Write([]byte("<html><body><center><h1>It Works!</h1></center><hr><center>goImg</center></body></html>"))
 }
 
 func LoadImage(path string) (img image.Image, err error) {
