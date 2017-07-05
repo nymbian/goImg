@@ -6,7 +6,7 @@ goImg是一个使用golang语言编写的图片服务器，支持多种图片格
 * 图片格式支持jpeg、gif、png、webp格式。
 * 文件存储目录采用md5算法生成。
 * 图片缩放只支持jpeg格式。
-* 支持服务器集群方式使用，同步方式为被动。
+* 支持服务器集群方式部署，同步方式为被动。
 ## 安装
 go get  github.com/nymbian/goImg
 ## 配置文件
