@@ -21,6 +21,9 @@ import (
 func getImgFromOtherServer(imageId string) bool {
 	result := false
 	servers := conf.Servers
+	if len(servers) == 0 {
+		return result
+	}
 	fmt.Println(servers)
 	for _, v := range servers {
 		if v == conf.ListenAddr {

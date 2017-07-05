@@ -318,6 +318,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	imageId := vars["imageId"]
 	action := vars["action"]
 	if len([]rune(imageId)) != 32 {
+		w.WriteHeader(404)
 		w.Write([]byte("Error:ImageID incorrect."))
 		return
 	}
@@ -325,10 +326,12 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	if !FileExist(imgPath) {
 
 		if action == "sync" {
+			w.WriteHeader(404)
 			w.Write([]byte("Error:Image Not Found."))
 			return
 		} else {
 			if !getImgFromOtherServer(imageId) {
+				w.WriteHeader(404)
 				w.Write([]byte("Error:Image Not Found."))
 				return
 			}
@@ -348,6 +351,7 @@ func DownloadResizHandler(w http.ResponseWriter, r *http.Request) {
 	heightInt, _ := strconv.Atoi(height)
 
 	if len([]rune(imageId)) != 32 {
+		w.WriteHeader(404)
 		w.Write([]byte("Error:ImageID incorrect."))
 		return
 	}
