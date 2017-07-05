@@ -316,6 +316,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageId := vars["imageId"]
+	action := vars["action"]
 	if len([]rune(imageId)) != 32 {
 		w.Write([]byte("Error:ImageID incorrect."))
 		return
@@ -323,26 +324,15 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	imgPath := GetPathByMd5(imageId)
 	if !FileExist(imgPath) {
 
-		if !getImgFromOtherServer(imageId) {
+		if action == "sync" {
 			w.Write([]byte("Error:Image Not Found."))
 			return
+		} else {
+			if !getImgFromOtherServer(imageId) {
+				w.Write([]byte("Error:Image Not Found."))
+				return
+			}
 		}
-
-	}
-	http.ServeFile(w, r, imgPath)
-}
-func DownloadSyncHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	imageId := vars["imageId"]
-	if len([]rune(imageId)) != 32 {
-		w.Write([]byte("Error:ImageID incorrect."))
-		return
-	}
-	imgPath := GetPathByMd5(imageId)
-	if !FileExist(imgPath) {
-
-		w.Write([]byte("Error:Image Not Found."))
-		return
 
 	}
 	http.ServeFile(w, r, imgPath)
