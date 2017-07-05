@@ -9,6 +9,7 @@ import (
 type Config struct {
 	ListenAddr string
 	Storage    string
+	Servers    []string
 }
 
 var conf Config

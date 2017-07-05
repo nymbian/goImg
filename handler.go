@@ -93,6 +93,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(bytesWritten)
+
 	w.Write([]byte(imageId))
 
 }
@@ -120,7 +121,7 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 			name = urlPath[len(urlPath)-1]
 		}
 		random := strconv.Itoa(rand.Int())
-		name = conf.Storage + random + name
+		name = conf.Storage + "/" + random + name
 		fmt.Println(name)
 		out, err := os.Create(name)
 		if err != nil {
@@ -233,7 +234,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 	random := strconv.Itoa(rand.Int())
 	fmt.Println(random)
 	name := random + "base64.jpg"
-	name = conf.Storage + name
+	name = conf.Storage + "/" + name
 	err = ioutil.WriteFile(name, base64DecodeString, fileAuth)
 	if err != nil {
 		log.Println(err)
@@ -321,8 +322,12 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	imgPath := GetPathByMd5(imageId)
 	if !FileExist(imgPath) {
-		w.Write([]byte("Error:Image Not Found."))
-		return
+
+		if !getImgFromOtherServer(imageId) {
+			w.Write([]byte("Error:Image Not Found."))
+			return
+		}
+
 	}
 	http.ServeFile(w, r, imgPath)
 }

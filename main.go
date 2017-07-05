@@ -9,8 +9,10 @@ import (
 
 func main() {
 	log.Println("start")
+
 	//test()
 	LoadConf()
+	log.Println(conf.Servers)
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler).Methods("GET")                                                  //home
 	r.HandleFunc("/upload", UploadHandler).Methods("POST")                                         //upload file
