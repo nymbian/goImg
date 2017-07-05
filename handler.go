@@ -331,6 +331,22 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, imgPath)
 }
+func DownloadSyncHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	imageId := vars["imageId"]
+	if len([]rune(imageId)) != 32 {
+		w.Write([]byte("Error:ImageID incorrect."))
+		return
+	}
+	imgPath := GetPathByMd5(imageId)
+	if !FileExist(imgPath) {
+
+		w.Write([]byte("Error:Image Not Found."))
+		return
+
+	}
+	http.ServeFile(w, r, imgPath)
+}
 
 func DownloadResizHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

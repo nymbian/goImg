@@ -12,7 +12,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/url"
+	//"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -38,7 +38,7 @@ func getImgFromOtherServer(imageId string) bool {
 func getImg(imageId string, server string) bool {
 
 	result := false
-	url := "http://" + server + "/" + imageId
+	url := "http://" + server + "/" + imageId + "_sync"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
@@ -150,4 +150,3 @@ func getImg(imageId string, server string) bool {
 	return result
 
 }
-
