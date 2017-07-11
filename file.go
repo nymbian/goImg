@@ -6,9 +6,10 @@ import (
 	"os"
 
 	"crypto/md5"
-
 	"io"
 	"math"
+	"math/rand"
+	"strconv"
 )
 
 func GetPathByMd5(imageId string) string {
@@ -25,6 +26,17 @@ func FileExist(filename string) bool {
 
 func MkdirByMd5(imageId string) error {
 	return os.MkdirAll(fmt.Sprintf("%s/%s/%s/%s", conf.Storage, imageId[0:8], imageId[8:16], imageId[16:24]), fileAuth)
+}
+
+func getTempFilePath(name string) string {
+	random := strconv.Itoa(rand.Int())
+	if name == "" {
+		name = "base64.jpg"
+	}
+	path := conf.Storage + "/temp/" + random + "/"
+	os.MkdirAll(path, fileAuth)
+	return path + name
+
 }
 
 const filechunk = 8192 // we settle for 8KB

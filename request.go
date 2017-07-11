@@ -10,11 +10,11 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
+
 	"net/http"
-	//"net/url"
+
 	"os"
-	"strconv"
+
 	"strings"
 )
 
@@ -58,9 +58,7 @@ func getImg(imageId string, server string) bool {
 		if len(urlPath) > 1 {
 			name = urlPath[len(urlPath)-1]
 		}
-		random := strconv.Itoa(rand.Int())
-		name = conf.Storage + "/" + random + name
-		fmt.Println(name)
+		name = getTempFilePath(name)
 		out, err := os.Create(name)
 		if err != nil {
 			log.Println(err)

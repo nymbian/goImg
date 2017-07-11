@@ -12,6 +12,7 @@ func main() {
 	//test()
 	LoadConf()
 	log.Println("listen:" + conf.ListenAddr)
+
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler).Methods("GET")                                                  //home
 	r.HandleFunc("/upload", UploadHandler).Methods("POST")                                         //upload file

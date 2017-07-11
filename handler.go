@@ -11,7 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
+
 	"net/http"
 	"os"
 	"strconv"
@@ -120,8 +120,7 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 		if len(urlPath) > 1 {
 			name = urlPath[len(urlPath)-1]
 		}
-		random := strconv.Itoa(rand.Int())
-		name = conf.Storage + "/" + random + name
+		name = getTempFilePath(name)
 		fmt.Println(name)
 		out, err := os.Create(name)
 		if err != nil {
@@ -231,10 +230,7 @@ func Base64Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	random := strconv.Itoa(rand.Int())
-	fmt.Println(random)
-	name := random + "base64.jpg"
-	name = conf.Storage + "/" + name
+	name := getTempFilePath("")
 	err = ioutil.WriteFile(name, base64DecodeString, fileAuth)
 	if err != nil {
 		log.Println(err)
